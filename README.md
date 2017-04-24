@@ -62,7 +62,13 @@ var mail_body = {
 	content: 'Hello!'
 }
 
-sendMailKZ.sendMail(mail_body, sg_api_key, mg_api_key, mg_domain, function(err, status){});
+sendMailKZ.sendMail(mail_body, sg_api_key, mg_api_key, mg_domain)
+	.then(status => {
+		//do something
+	})
+	.catch(status => {
+		//do something
+	});
 ```
 
 #### Author
