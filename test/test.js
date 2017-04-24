@@ -1,76 +1,75 @@
-var mocha = require('mocha');
-var sinon = require('sinon');
-var sendMailKZ = require('../lib/send-mail-kz');
-var sgApiKey = 'Your sendgrid api key';
-var mgApiKey = 'Your mailgun api key';
-var mgDomain = 'example.mailgun.org';
-var sendgrid = require('sendgrid')(sgApiKey);
-var mailgun = require('mailgun-js')({apiKey: mgApiKey, domain: mgDomain});
+const mocha = require('mocha');
+const chai = require('chai');
+const sinon = require('sinon');
+const expect = require('chai').expect;
+const sendMailKZ = require('../lib/send-mail-kz');
+const sgApiKey = 'sendgrid api key';
+const mgApiKey = 'mailgun api key';
+const mgDomain = 'mailgun.domain.org';
+const sendgrid = require('sendgrid')(sgApiKey);
+const mailgun = require('mailgun-js')({apiKey: mgApiKey, domain: mgDomain});
+const mailBody = {
+	fromMailAddress: 'test@example.com',
+	toMailAddress: 'test@example.com',
+	subject: 'subject',
+	emailContent: 'cntent'
+};
 
-describe('function SGgetStats: sendgrid get status', function(){
-	it('should call sendgrid.API once with an empty request', function(){
-		var request = sendgrid.emptyRequest();
-		var sg = sinon.mock(sendgrid);
-		sg.expects('API').once();
-		sendMailKZ.SGgetStats(sgApiKey, function() {});
-		process.nextTick(function() {
-			sg.verify();			
-			sg.restore();
-		})
-	})
-})
+describe('test get_stats_sg', function() {
+	it('should return true with a valid SendGrid api key provided', function() {
+		var test = true;
+		var testResult = sendMailKZ.get_stats_sg(sgApiKey);
+  
+		return testResult.then(ok => {
+			expect(ok).to.equal(test);
+		});
+	});
+});
 
-describe('function MGgetStats: mailgun get status', function(){
-	it('should call mailgun.get once with mailgun domain', function(){
-		var mg = sinon.mock(mailgun);
-		mg.expects('get').once();
-		sendMailKZ.MGgetStats(mgApiKey, mgDomain, function() {});
-		process.nextTick(function() {
-			mg.verify();			
-			mg.restore();
-		})
-	})
-})
+describe('test get_stats_mg', function() {
+	it('should return true with valid Mailgun api key and domain provided', function() {
+		var test = true;
+		var testResult = sendMailKZ.get_stats_mg(mgApiKey, mgDomain);
 
-describe('function sendMailSG: send mail using sendgrid', function(){
-	it('should call sendgrid.api once with request', function(){
-		var mailBody = {
-			fromMailAddress: 'fromMailAddress',
-			toMailAddress: 'toMailAddress',
-			subject: 'subject',
-			content: 'cntent'
-		}
-		var helper = require('sendgrid').mail;
-		var from_email = new helper.Email(mailBody.fromMailAddress);
-		var to_email = new helper.Email(mailBody.toMailAddress);
-		var subject = mailBody.subject;
-		var content = new helper.Content('text/plain', mailBody.emailContent);
-		var mail = new helper.Mail(from_email, subject, to_email, content);
-		var request = sendgrid.emptyRequest();
-		var sg = sinon.mock(sendgrid);
-		sg.expects('API').once();
-		sendMailKZ.sendMailSG(mailBody, sgApiKey);
-		process.nextTick(function() {
-			sg.verify();			
-			sg.restore();
-		})
-	})
-})
+		return testResult.then(ok => {
+			expect(ok).to.equal(test);
+		});
+	});
+});
 
-describe('function sendMailMG: send mail using mailgun', function(){
-	it('should call mailgun.message once with mail body, mailgun api key and mailgun domain', function(){
-		var mailBody = {
-			fromMailAddress: 'fromMailAddress',
-			toMailAddress: 'toMailAddress',
-			subject: 'subject',
-			content: 'cntent'
-		}
-		var mg = sinon.mock(mailgun);
-		mg.expects('send').once().withArgs(mailBody);
-		sendMailKZ.sendMailMG(mailBody, mgApiKey, mgDomain, function() {});
-		process.nextTick(function() {
-			sg.verify();			
-			sg.restore();
-		})
-	})
-})
+describe('test send_mail_sg', function() {
+	it('should return code 202 with valid mailbody and SendGrid api key provided', function() {
+		var testResult = sendMailKZ.send_mail_sg(mailBody, sgApiKey);
+
+		return testResult.then(result => {
+			expect(result).to.equal(202);
+		});
+	});
+});
+
+describe('test send_mail_mg', function() {
+	it('should resolve promise with valid mailbody, Mailgun api key and Mailgun domain provided', function() {
+		var testResult = sendMailKZ.send_mail_mg(mailBody, mgApiKey, mgDomain);
+
+		return testResult.then(result => {});
+	});
+});
+
+describe('test send_mail', function() {
+	it('should resolve promise with correct args provided', function() {
+		var testResult = sendMailKZ.send_mail(mailBody, sgApiKey, mgApiKey, mgDomain);
+
+		return testResult.then(status => {});
+	});
+
+	it('should call get_stats_sg once with sendgrid api key', function() {
+		var sendMail = sinon.mock(sendMailKZ);
+		sendMail.expects('get_stats_sg').once().withArgs(sgApiKey);
+		var testResult = sendMailKZ.send_mail(mailBody, sgApiKey, mgApiKey, mgDomain);
+
+		return testResult.then(status => {
+			sendMail.verify();
+			sendMail.restore();
+		});
+	});
+});
