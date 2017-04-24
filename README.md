@@ -26,7 +26,7 @@ mailBody = {
 	fromMailAddress: 'Sender Email address',
 	toMailAddress: 'Receiver Email address',
 	subject: 'subject',
-	content: 'mail cntent'
+	emailContent: 'mail cntent'
 }
 ```
 sgApiKey is SendGrid api Key. User will need to apply for themslves on [SendGrid official website](https://sendgrid.com/).
